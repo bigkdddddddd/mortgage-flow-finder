@@ -87,8 +87,8 @@ const Eligibility = () => {
     const deps = depMap[answers.dependents] ?? 0;
     const rate = 6.2;
     const term = 30;
-    const bp = borrowingPower(answers.income, answers.hasPartner === "yes" ? answers.partnerIncome : 0, monthlyExpenses, monthlyDebts, deps, rate);
-    const monthly = monthlyRepayment(bp, rate, term);
+    const bp = estimateBorrowingPower({ grossIncome: answers.income, partnerIncome: answers.hasPartner === "yes" ? answers.partnerIncome : 0, monthlyExpenses, existingDebtRepayments: monthlyDebts, dependents: deps, ratePct: rate, termYears: term });
+    const monthly = periodicPayment(bp, rate, term);
     return { borrowingPower: bp, monthlyRepayment: monthly, rate, term, combinedIncome: answers.income + (answers.hasPartner === "yes" ? answers.partnerIncome : 0) };
   }, [answers]);
 
@@ -187,7 +187,7 @@ const Eligibility = () => {
         return (
           <StepShell title="What's your gross annual income?" sub="Before tax — your total salary package.">
             <div className="mt-2">
-              <FieldSlider label="Annual income" value={answers.income} min={30000} max={500000} step={5000} prefix="$" onChange={(v) => setAnswers({ ...answers, income: v })} />
+              <FieldSlider id="elig-income" label="Annual income" value={answers.income} min={30000} max={500000} step={5000} prefix="$" onChange={(v) => setAnswers({ ...answers, income: v })} />
             </div>
             <Button onClick={next} variant="gold" size="lg" className="w-full mt-6">Continue <ArrowRight className="h-4 w-4" /></Button>
           </StepShell>
@@ -203,7 +203,7 @@ const Eligibility = () => {
             </div>
             {answers.hasPartner === "yes" && (
               <div className="mt-5 animate-fade-up">
-                <FieldSlider label="Partner's annual income" value={answers.partnerIncome} min={0} max={500000} step={5000} prefix="$" onChange={(v) => setAnswers({ ...answers, partnerIncome: v })} />
+                <FieldSlider id="elig-partner" label="Partner's annual income" value={answers.partnerIncome} min={0} max={500000} step={5000} prefix="$" onChange={(v) => setAnswers({ ...answers, partnerIncome: v })} />
                 <Button onClick={next} variant="gold" size="lg" className="w-full mt-4">Continue <ArrowRight className="h-4 w-4" /></Button>
               </div>
             )}
