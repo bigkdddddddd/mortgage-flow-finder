@@ -115,6 +115,21 @@ const Index = () => {
         </div>
       </Section>
 
+      {/* ELIGIBILITY CTA */}
+      <Section spacing="lg">
+        <Card className="p-8 sm:p-12 bg-gradient-hero text-primary-foreground rounded-2xl text-center relative overflow-hidden">
+          <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
+          <div className="relative">
+            <Calculator className="h-10 w-10 text-accent mx-auto mb-4" />
+            <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-medium text-balance">Check your borrowing power in under 2 minutes</h2>
+            <p className="mt-3 text-primary-foreground/75 max-w-lg mx-auto">Answer a few simple questions and get an instant estimate — no credit check, no commitment.</p>
+            <Button asChild variant="hero" size="xl" className="mt-6">
+              <Link to="/eligibility">Check Eligibility <ArrowRight className="h-4 w-4" /></Link>
+            </Button>
+          </div>
+        </Card>
+      </Section>
+
       {/* CALCULATORS PREVIEW */}
       <Section spacing="lg">
         <div className="grid lg:grid-cols-[1fr_1.2fr] gap-12 lg:gap-16 items-center">
