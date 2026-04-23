@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { z } from "zod";
-import { ArrowRight, ArrowLeft, Lock, CheckCircle2, ShieldCheck, Star, Calculator, Phone } from "lucide-react";
+import { ArrowRight, ArrowLeft, CheckCircle2, ShieldCheck, Star, Calculator, Phone, Home, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -259,17 +259,11 @@ const Eligibility = () => {
       /* ── Step 7: Contact gate ── */
       case 7:
         return (
-          <StepShell title="You're almost there!" sub="Enter your details to unlock your personalised estimate.">
-            {/* Blurred teaser */}
-            <Card className="p-5 mb-6 bg-gradient-card border-border relative overflow-hidden">
-              <div className="text-xs uppercase tracking-wider text-accent font-semibold mb-2">Your estimated borrowing power</div>
-              <div className="font-display text-3xl blur-[8px] select-none">{rangeText}</div>
-              <div className="absolute inset-0 flex items-center justify-center bg-card/60 backdrop-blur-[2px]">
-                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                  <Lock className="h-4 w-4" /> Enter details to unlock
-                </div>
-              </div>
-            </Card>
+          <StepShell title="You're almost there!" sub="Enter your details to get your personalised borrowing estimate.">
+            <div className="flex items-center gap-3 p-4 rounded-xl bg-accent/10 border border-accent/20 mb-6">
+              <CheckCircle2 className="h-5 w-5 text-accent shrink-0" />
+              <p className="text-sm text-foreground">Your estimate is ready! Just pop in your details and we'll show you the result.</p>
+            </div>
 
             <form onSubmit={handleContactSubmit} className="space-y-4">
               <div>
@@ -309,10 +303,9 @@ const Eligibility = () => {
               <p className="text-sm text-muted-foreground mt-2">Based on the details you provided. For a precise figure, book a free consultation.</p>
             </div>
 
-            <div className="grid sm:grid-cols-3 gap-4 mb-6">
+            <div className="grid sm:grid-cols-2 gap-4 mb-6">
               <ResultCard label="Estimated borrowing power" value={`$${Math.round(results.borrowingPower).toLocaleString()}`} accent />
-              <ResultCard label="Monthly repayment" value={`$${Math.round(results.monthlyRepayment).toLocaleString()}`} />
-              <ResultCard label="Combined income" value={`$${results.combinedIncome.toLocaleString()}`} />
+              <ResultCard label="Combined gross income" value={`$${results.combinedIncome.toLocaleString()}`} />
             </div>
 
             <Card className="p-5 bg-gradient-card border-border mb-6">
@@ -347,9 +340,14 @@ const Eligibility = () => {
           <Link to="/" className="font-display text-lg tracking-tight">
             <span className="text-accent">Meridian</span> Mortgage
           </Link>
-          <a href="tel:1300000000" className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1.5 transition-colors">
-            <Phone className="h-3.5 w-3.5" /> 1300 000 000
-          </a>
+          <div className="flex items-center gap-4">
+            <Link to="/" className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1.5 transition-colors">
+              <Home className="h-3.5 w-3.5" /> Home
+            </Link>
+            <a href="tel:1300000000" className="text-xs text-muted-foreground hover:text-accent flex items-center gap-1.5 transition-colors">
+              <Phone className="h-3.5 w-3.5" /> 1300 000 000
+            </a>
+          </div>
         </div>
       </header>
 
@@ -376,6 +374,18 @@ const Eligibility = () => {
           {renderStep()}
         </div>
       </main>
+
+      {/* Lender logos */}
+      <section className="border-t border-border py-10 px-4">
+        <div className="max-w-3xl mx-auto text-center">
+          <p className="text-sm text-muted-foreground font-medium mb-6">We compare 40+ lenders to find you the best deal</p>
+          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4">
+            {["Westpac", "CommBank", "ANZ", "NAB", "St. George", "Macquarie", "ING", "Suncorp", "BOQ", "Bankwest", "ME Bank", "Firstmac", "Auswide Bank", "Teachers Mutual"].map((name) => (
+              <span key={name} className="text-xs sm:text-sm font-semibold text-muted-foreground/70 tracking-wide uppercase">{name}</span>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Minimal footer */}
       <footer className="border-t border-border py-4 text-center text-xs text-muted-foreground">
