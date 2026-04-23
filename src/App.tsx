@@ -14,10 +14,13 @@ import FAQ from "./pages/FAQ.tsx";
 import Contact from "./pages/Contact.tsx";
 import Resources from "./pages/Resources.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import Eligibility from "./pages/Eligibility.tsx";
 
 const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
+  // Standalone landing page — no SiteLayout chrome
+  { path: "/eligibility", element: <Eligibility /> },
   {
     element: <SiteLayout />,
     children: [
