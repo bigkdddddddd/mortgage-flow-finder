@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { FieldSlider, ResultCard } from "@/components/calculators/shared";
-import { borrowingPower, monthlyRepayment } from "@/lib/finance";
+import { estimateBorrowingPower, periodicPayment } from "@/lib/finance";
 
 /* ─── types ─── */
 interface Answers {
