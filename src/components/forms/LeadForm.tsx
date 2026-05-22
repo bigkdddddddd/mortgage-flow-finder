@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 const schema = z.object({
   name: z.string().trim().min(2, "Please enter your name").max(80),
@@ -41,10 +42,27 @@ export const LeadForm = ({ variant = "card", defaultTopic, title = "Request a ca
     }
     setErrors({});
     setSubmitting(true);
-    await new Promise((r) => setTimeout(r, 900));
+
+    try {
+      const html = `
+        <div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:560px;margin:auto;padding:24px;color:#1a1a1a;">
+          <h1 style="font-size:22px;margin:0 0 12px;">Thanks for reaching out, ${data.name.split(" ")[0]} 👋</h1>
+          <p style="color:#555;line-height:1.5;">We've received your request and a Meridian Mortgage broker will be in touch within one business day.</p>
+          <div style="background:#f7f4ee;border:1px solid #e6dfd0;border-radius:12px;padding:16px;margin:16px 0;">
+            <div><b>Topic:</b> ${data.topic}</div>
+            ${data.message ? `<div style="margin-top:8px;"><b>Your message:</b><br/>${data.message.replace(/</g, "&lt;")}</div>` : ""}
+          </div>
+          <p style="color:#888;font-size:12px;margin-top:24px;">— The Meridian Mortgage team</p>
+        </div>`;
+      supabase.functions.invoke("send-email", {
+        body: { to: data.email, subject: "We received your request — Meridian Mortgage", html },
+      }).catch((e) => console.warn("email failed", e));
+    } catch (e) { console.warn(e); }
+
+    await new Promise((r) => setTimeout(r, 700));
     setSubmitting(false);
     setSubmitted(true);
-    toast({ title: "Request received", description: "We'll be in touch within one business day." });
+    toast({ title: "Request received", description: "We'll be in touch within one business day. Check your email for confirmation." });
   };
 
   if (submitted) {
