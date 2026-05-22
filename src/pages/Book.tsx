@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
-import { format, addDays, isWeekend, startOfDay } from "date-fns";
+import { format, addDays, isWeekend, startOfDay, parse, addMinutes } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Card } from "@/components/ui/card";
 import { Section, PageHero } from "@/components/layout/Section";
@@ -13,8 +13,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CalendarIcon, CheckCircle2, ChevronLeft, Clock, Loader2, MapPin, Phone, Video } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const TIME_SLOTS = ["9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM", "1:00 PM", "1:30 PM", "2:00 PM", "2:30 PM", "3:00 PM", "3:30 PM", "4:00 PM", "4:30 PM"];
+const SLOT_MINUTES = 30;
 
 const schema = z.object({
   name: z.string().trim().min(2, "Enter your full name").max(80),
@@ -27,6 +29,12 @@ const schema = z.object({
 
 type Mode = "phone" | "video" | "in-person";
 
+// Combine date + "9:00 AM" string into a Date
+const slotToDate = (date: Date, slot: string): Date => {
+  const parsed = parse(slot, "h:mm a", date);
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), parsed.getHours(), parsed.getMinutes());
+};
+
 const Book = () => {
   const [step, setStep] = useState<1 | 2 | 3 | "done">(1);
   const [date, setDate] = useState<Date | undefined>(undefined);
@@ -35,23 +43,76 @@ const Book = () => {
   const [data, setData] = useState({ name: "", email: "", phone: "", purpose: "", amount: "", notes: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [busyRanges, setBusyRanges] = useState<Array<{ start: Date; end: Date }>>([]);
+  const [loadingBusy, setLoadingBusy] = useState(false);
 
   const minDate = useMemo(() => addDays(startOfDay(new Date()), 1), []);
 
+  // Fetch busy ranges from Google Calendar when a date is picked
+  useEffect(() => {
+    if (!date) return;
+    let cancelled = false;
+    setLoadingBusy(true);
+    setTime("");
+    const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0);
+    const dayEnd = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59);
+    supabase.functions
+      .invoke("calendar-busy", { body: { timeMin: dayStart.toISOString(), timeMax: dayEnd.toISOString() } })
+      .then(({ data: res, error }) => {
+        if (cancelled) return;
+        if (error) {
+          console.warn("busy fetch failed", error);
+          setBusyRanges([]);
+        } else {
+          const ranges = (res?.busy ?? []).map((b: { start: string; end: string }) => ({
+            start: new Date(b.start),
+            end: new Date(b.end),
+          }));
+          setBusyRanges(ranges);
+        }
+      })
+      .finally(() => !cancelled && setLoadingBusy(false));
+    return () => { cancelled = true; };
+  }, [date]);
+
+  const isSlotBusy = (slot: string): boolean => {
+    if (!date) return false;
+    const start = slotToDate(date, slot);
+    const end = addMinutes(start, SLOT_MINUTES);
+    return busyRanges.some((b) => start < b.end && end > b.start);
+  };
+
   const handleSubmit = async () => {
-    const parse = schema.safeParse(data);
-    if (!parse.success) {
+    const parsed = schema.safeParse(data);
+    if (!parsed.success) {
       const fe: Record<string, string> = {};
-      parse.error.issues.forEach((i) => { fe[i.path[0] as string] = i.message; });
+      parsed.error.issues.forEach((i) => { fe[i.path[0] as string] = i.message; });
       setErrors(fe);
       return;
     }
+    if (!date || !time) return;
     setErrors({});
     setSubmitting(true);
-    await new Promise((r) => setTimeout(r, 1100));
+
+    const start = slotToDate(date, time);
+    const end = addMinutes(start, SLOT_MINUTES);
+
+    const { data: res, error } = await supabase.functions.invoke("create-booking", {
+      body: {
+        name: data.name, email: data.email, phone: data.phone,
+        startISO: start.toISOString(), endISO: end.toISOString(),
+        mode, purpose: data.purpose, amount: data.amount, notes: data.notes,
+      },
+    });
+
     setSubmitting(false);
+    if (error || !res?.success) {
+      console.error(error || res);
+      toast({ title: "Booking failed", description: "Please try again or call us directly.", variant: "destructive" });
+      return;
+    }
     setStep("done");
-    toast({ title: "Appointment confirmed", description: `${date && format(date, "EEE d MMM")} at ${time}` });
+    toast({ title: "Appointment confirmed", description: `${format(date, "EEE d MMM")} at ${time}. Check your email.` });
   };
 
   if (step === "done") {
@@ -91,11 +152,10 @@ const Book = () => {
 
   return (
     <>
-      <PageHero eyebrow="Book a consultation" title="A 30-minute call. Zero obligation." subtitle="Pick a time that suits — phone, video, or in our Sydney office." />
+      <PageHero eyebrow="Book a consultation" title="A 30-minute call. Zero obligation." subtitle="Pick a time that suits — phone, video, or in our Sydney office. Calendar synced live." />
 
       <Section spacing="lg">
         <div className="max-w-4xl mx-auto">
-          {/* Stepper */}
           <div className="flex items-center justify-center gap-2 mb-8 text-sm">
             {[1, 2, 3].map((n) => (
               <div key={n} className="flex items-center gap-2">
@@ -125,25 +185,39 @@ const Book = () => {
                     initialFocus
                     className="p-3 pointer-events-auto rounded-lg border border-border bg-card"
                   />
-                  <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1.5"><CalendarIcon className="h-3.5 w-3.5" /> Mon–Fri only · AEST</p>
+                  <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1.5"><CalendarIcon className="h-3.5 w-3.5" /> Mon–Fri only · AEST · Live availability</p>
                 </div>
                 <div>
-                  <div className="text-sm font-medium mb-3 flex items-center gap-2"><Clock className="h-4 w-4 text-accent" />{date ? format(date, "EEEE, d MMMM") : "Choose a date first"}</div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    {TIME_SLOTS.map((t) => (
-                      <button
-                        key={t}
-                        type="button"
-                        disabled={!date}
-                        onClick={() => setTime(t)}
-                        className={cn(
-                          "h-10 rounded-md border text-sm font-medium transition-colors",
-                          !date && "opacity-40 cursor-not-allowed",
-                          time === t ? "border-accent bg-accent text-accent-foreground" : "border-border bg-card hover:border-accent/50 hover:bg-accent-soft/40",
-                        )}
-                      >{t}</button>
-                    ))}
+                  <div className="text-sm font-medium mb-3 flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-accent" />
+                    {date ? format(date, "EEEE, d MMMM") : "Choose a date first"}
+                    {loadingBusy && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
                   </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {TIME_SLOTS.map((t) => {
+                      const busy = isSlotBusy(t);
+                      const disabled = !date || busy || loadingBusy;
+                      return (
+                        <button
+                          key={t}
+                          type="button"
+                          disabled={disabled}
+                          onClick={() => setTime(t)}
+                          title={busy ? "Unavailable — already booked" : ""}
+                          className={cn(
+                            "h-10 rounded-md border text-sm font-medium transition-colors relative",
+                            !date && "opacity-40 cursor-not-allowed",
+                            busy && "opacity-40 cursor-not-allowed line-through bg-muted text-muted-foreground border-border",
+                            !busy && time === t && "border-accent bg-accent text-accent-foreground",
+                            !busy && time !== t && date && "border-border bg-card hover:border-accent/50 hover:bg-accent-soft/40",
+                          )}
+                        >{t}</button>
+                      );
+                    })}
+                  </div>
+                  {date && !loadingBusy && busyRanges.length > 0 && (
+                    <p className="text-xs text-muted-foreground mt-3">Greyed-out times are already booked.</p>
+                  )}
                 </div>
               </div>
             )}
@@ -219,7 +293,6 @@ const Book = () => {
               </div>
             )}
 
-            {/* Nav */}
             <div className="mt-8 flex items-center justify-between gap-3">
               <Button type="button" variant="ghost" onClick={() => setStep((s) => (s === 1 ? 1 : (s as number) - 1) as 1 | 2 | 3)} disabled={step === 1}>
                 <ChevronLeft className="h-4 w-4" /> Back
@@ -240,7 +313,6 @@ const Book = () => {
             </div>
           </Card>
 
-          {/* Summary chip */}
           {(date || time || mode) && step !== 1 && (
             <div className="mt-4 flex flex-wrap gap-2 justify-center text-xs text-muted-foreground">
               {date && <span className="rounded-full bg-secondary px-3 py-1.5">📅 {format(date, "EEE d MMM")}</span>}
