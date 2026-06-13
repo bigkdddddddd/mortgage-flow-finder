@@ -14,7 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      leads: {
+        Row: {
+          id: string
+          created_at: string
+          full_name: string
+          email: string | null
+          phone: string
+          loan_type: string
+          situation: string | null
+          annual_income: number | null
+          partner_income: number | null
+          monthly_expenses: number | null
+          monthly_debt_repayments: number | null
+          dependents: number | null
+          estimated_borrowing_power: number | null
+          estimated_monthly_repayment: number | null
+          estimated_rate: number | null
+          estimated_term_years: number | null
+          source_path: string | null
+          notes: string | null
+          consent_to_contact: boolean
+          metadata: Json
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          full_name: string
+          email?: string | null
+          phone: string
+          loan_type?: string
+          situation?: string | null
+          annual_income?: number | null
+          partner_income?: number | null
+          monthly_expenses?: number | null
+          monthly_debt_repayments?: number | null
+          dependents?: number | null
+          estimated_borrowing_power?: number | null
+          estimated_monthly_repayment?: number | null
+          estimated_rate?: number | null
+          estimated_term_years?: number | null
+          source_path?: string | null
+          notes?: string | null
+          consent_to_contact?: boolean
+          metadata?: Json
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          full_name?: string
+          email?: string | null
+          phone?: string
+          loan_type?: string
+          situation?: string | null
+          annual_income?: number | null
+          partner_income?: number | null
+          monthly_expenses?: number | null
+          monthly_debt_repayments?: number | null
+          dependents?: number | null
+          estimated_borrowing_power?: number | null
+          estimated_monthly_repayment?: number | null
+          estimated_rate?: number | null
+          estimated_term_years?: number | null
+          source_path?: string | null
+          notes?: string | null
+          consent_to_contact?: boolean
+          metadata?: Json
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
