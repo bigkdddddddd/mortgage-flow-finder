@@ -16,7 +16,7 @@ export const SiteFooter = () => {
             </div>
           </div>
           <p className="text-sm text-primary-foreground/70 leading-relaxed max-w-xs">
-            Independent mortgage brokers helping families and investors secure smarter home finance since 2011.
+            Independent mortgage brokers helping families and investors secure smarter home finance.
           </p>
           <div className="flex gap-3 mt-5">
             {[Linkedin, Facebook, Instagram].map((Icon, i) => (
