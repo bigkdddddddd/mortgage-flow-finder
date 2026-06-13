@@ -10,6 +10,8 @@ export type LoanType =
   | "business_finance"
   | "other";
 
+export type LeadMetadata = Record<string, string | number | boolean | null>;
+
 export interface LeadSubmission {
   fullName: string;
   email?: string;
@@ -27,7 +29,7 @@ export interface LeadSubmission {
   estimatedTermYears?: number;
   sourcePath?: string;
   notes?: string;
-  metadata?: Record<string, unknown>;
+  metadata?: LeadMetadata;
 }
 
 export async function submitLead(input: LeadSubmission) {
