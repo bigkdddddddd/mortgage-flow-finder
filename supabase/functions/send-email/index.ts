@@ -3,8 +3,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
+const RESEND_URL = "https://api.resend.com/emails";
 const FROM_ADDRESS = "KM Financing <info@kmfinancing.com>";
+const BUSINESS_EMAIL = "komailmousavi1@gmail.com";
 
 interface Payload {
   to: string;
@@ -12,13 +13,11 @@ interface Payload {
   html: string;
 }
 
-Deno.serve(async (req) => {
+Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY missing");
     if (!RESEND_API_KEY) throw new Error("RESEND_API_KEY missing");
 
     const { to, subject, html } = (await req.json()) as Payload;
@@ -29,17 +28,22 @@ Deno.serve(async (req) => {
       });
     }
 
-    const res = await fetch(`${GATEWAY_URL}/emails`, {
+    const res = await fetch(RESEND_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "X-Connection-Api-Key": RESEND_API_KEY,
+        Authorization: `Bearer ${RESEND_API_KEY}`,
       },
-      body: JSON.stringify({ from: FROM_ADDRESS, to: [to], subject, html }),
+      body: JSON.stringify({
+        from: FROM_ADDRESS,
+        to: [to],
+        bcc: [BUSINESS_EMAIL],
+        subject,
+        html,
+      }),
     });
 
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(`Resend ${res.status}: ${JSON.stringify(data)}`);
 
     return new Response(JSON.stringify({ success: true, id: data?.id }), {
