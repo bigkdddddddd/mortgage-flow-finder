@@ -55,7 +55,7 @@ export const LeadForm = ({ variant = "card", defaultTopic, title = "Request a ca
           <p style="color:#888;font-size:12px;margin-top:24px;">— The Meridian Mortgage team</p>
         </div>`;
       supabase.functions.invoke("send-email", {
-        body: { to: data.email, subject: "We received your request — Meridian Mortgage", html },
+        body: { to: data.email, subject: "We received your request — KM Financing", html },
       }).catch((e) => console.warn("email failed", e));
     } catch (e) { console.warn(e); }
 

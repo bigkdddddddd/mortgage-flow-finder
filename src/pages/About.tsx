@@ -9,31 +9,31 @@ import brokerImg from "@/assets/broker-portrait.jpg";
 const About = () => {
   return (
     <>
-      <PageHero eyebrow="About Meridian" title="Independent brokers, with skin in the game." subtitle="Founded in 2011, Meridian Mortgage helps Australians make smarter home finance decisions — with advice that's transparent, modern, and genuinely on their side." />
+      <PageHero eyebrow="About KM Financing" title="Independent brokers, with skin in the game." subtitle="Founded in 2026, KM Financing helps Australians make smarter home and asset finance decisions — with advice that's transparent, modern, and genuinely on their side." />
 
       <Section spacing="lg">
         <div className="grid lg:grid-cols-[420px_1fr] gap-12 items-start">
           <div className="relative">
             <div className="absolute -inset-3 bg-accent/15 rounded-2xl blur-xl" />
-            <img src={brokerImg} alt="Meridian principal broker portrait" loading="lazy" width={1024} height={1024} className="relative rounded-2xl shadow-elegant aspect-square object-cover w-full" />
+            <img src={brokerImg} alt="KM Financing principal broker portrait" loading="lazy" width={1024} height={1024} className="relative rounded-2xl shadow-elegant aspect-square object-cover w-full" />
             <Card className="absolute -bottom-5 left-1/2 -translate-x-1/2 px-5 py-3 bg-card shadow-elegant border-border whitespace-nowrap">
               <div className="text-xs uppercase tracking-wider text-accent font-semibold">Principal Broker</div>
-              <div className="font-display text-base mt-0.5">Aarav Mehta</div>
+              <div className="font-display text-base mt-0.5">Komail Mousavi</div>
             </Card>
           </div>
           <div>
             <Eyebrow>Our story</Eyebrow>
             <h2 className="font-display text-3xl sm:text-4xl mt-4 text-balance">Built on a simple idea: clients first, always.</h2>
             <div className="mt-6 space-y-4 text-foreground/80 leading-relaxed">
-              <p>Aarav Mehta founded Meridian after a decade inside major banks, frustrated by sales targets that didn't always align with client outcomes. He set out to build a brokerage where the recommendation always starts with what's right for the borrower.</p>
-              <p>Today our team has helped over 2,400 Australian families and investors secure more than $1.4 billion in lending — with a 4.9-star average rating and 93% of new business coming from referrals.</p>
+              <p>KM Financing was created to make finance feel clearer, faster, and more personal. We help clients compare lending options across home loans, car loans, and asset finance, with guidance that starts with what actually suits their situation.</p>
+              <p>We focus on giving clients clear guidance, comparing suitable lending options, and helping them move through the finance process with more confidence and less confusion.</p>
               <p>We're modern, paperless, and proudly independent. We're also human: we'll pick up the phone, explain the fine print, and remember your name when you call back next year.</p>
             </div>
             <div className="grid grid-cols-3 gap-4 mt-8">
               {[
-                { n: "13+", l: "Years experience" },
-                { n: "$1.4B", l: "Lent to clients" },
-                { n: "2,400+", l: "Families helped" },
+                { n: "Home", l: "Loan support" },
+                { n: "Car", l: "Finance options" },
+                { n: "Asset", l: "Lending solutions" },
               ].map((s) => (
                 <div key={s.l} className="rounded-xl border border-border p-5 bg-card">
                   <div className="font-display text-2xl text-accent">{s.n}</div>

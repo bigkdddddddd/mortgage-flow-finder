@@ -40,12 +40,12 @@ export const SiteHeader = () => {
         <Link to="/" className="flex items-center gap-2 group">
           <div className="relative">
             <div className="h-9 w-9 rounded-lg bg-gradient-hero flex items-center justify-center shadow-md">
-              <span className="font-display text-accent font-bold text-lg leading-none">M</span>
+              <span className="font-display text-accent font-bold text-sm leading-none">KM</span>
             </div>
           </div>
           <div className="leading-tight">
-            <div className="font-display font-semibold text-base tracking-tight">Meridian</div>
-            <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground -mt-0.5">Mortgage</div>
+            <div className="font-display font-semibold text-base tracking-tight">KM</div>
+            <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground -mt-0.5">Financing</div>
           </div>
         </Link>
 

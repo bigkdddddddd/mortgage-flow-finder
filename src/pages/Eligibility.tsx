@@ -124,7 +124,7 @@ const Eligibility = () => {
           <p style="color:#888;font-size:12px;margin-top:28px;">— The Meridian Mortgage team</p>
         </div>`;
       supabase.functions.invoke("send-email", {
-        body: { to: contact.email, subject: "Your Meridian borrowing estimate", html },
+        body: { to: contact.email, subject: "Your KM Financing borrowing estimate", html },
       }).catch((e) => console.warn("email failed", e));
     } catch (e) { console.warn(e); }
 
@@ -311,7 +311,7 @@ const Eligibility = () => {
                     Book a free consultation and unlock your real borrowing power.
                   </h3>
                   <p className="text-sm text-muted-foreground mt-2">
-                    A Meridian broker will tailor an exact figure to lender policy — 30 minutes, zero obligation.
+                    A KM Financing Broker will tailor an exact figure to lender policy — 30 minutes, zero obligation.
                   </p>
                 </div>
               </div>
@@ -320,7 +320,7 @@ const Eligibility = () => {
                   <Link to="/book">Book a Free Consultation <ArrowRight className="h-4 w-4" /></Link>
                 </Button>
                 <Button asChild variant="outline" size="lg" className="w-full">
-                  <a href="tel:1300000000"><Phone className="h-4 w-4" /> Call Us Now</a>
+                  <a href="tel:0410 391 183"><Phone className="h-4 w-4" /> Call Us Now</a>
                 </Button>
               </div>
             </Card>
