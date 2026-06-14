@@ -4,7 +4,7 @@ const corsHeaders = {
 };
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
-const FROM_ADDRESS = "Meridian Mortgage <onboarding@resend.dev>";
+const FROM_ADDRESS = "KM Financing <info@kmfinancing.com>";
 
 interface Payload {
   to: string;

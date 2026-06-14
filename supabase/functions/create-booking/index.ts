@@ -5,7 +5,7 @@ const corsHeaders = {
 
 const CAL_URL = "https://connector-gateway.lovable.dev/google_calendar/calendar/v3";
 const RESEND_URL = "https://connector-gateway.lovable.dev/resend";
-const FROM_ADDRESS = "Meridian Mortgage <onboarding@resend.dev>";
+const FROM_ADDRESS = "KM Financing <info@kmfinancing.com>";
 
 interface BookingPayload {
   name: string;
