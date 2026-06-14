@@ -226,7 +226,7 @@ const Book = () => {
               <div className="mt-6">
                 <RadioGroup value={mode} onValueChange={(v) => setMode(v as Mode)} className="grid sm:grid-cols-3 gap-4">
                   {[
-                    { v: "video", icon: Video, t: "Video call", d: "Zoom or Google Meet — most popular" },
+                ,
                     { v: "phone", icon: Phone, t: "Phone call", d: "Quick and easy, just pick up" },
                     { v: "in-person", icon: MapPin, t: "In person", d: "Our Sydney office, Level 12" },
                   ].map((o) => (

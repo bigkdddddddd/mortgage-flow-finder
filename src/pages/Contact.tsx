@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Section, PageHero, Eyebrow } from "@/components/layout/Section";
 import { LeadForm } from "@/components/forms/LeadForm";
-import { Mail, Phone, MapPin, Clock, Linkedin, Facebook, Instagram } from "lucide-react";
+import { Mail, Phone, Clock, Linkedin, Facebook, Instagram } from "lucide-react";
 
 const Contact = () => {
   return (
@@ -17,10 +17,10 @@ const Contact = () => {
 
             <div className="mt-8 space-y-5">
               {[
-                { i: Phone, t: "Phone", d: "1300 000 000", h: "tel:1300000000" },
-                { i: Mail, t: "Email", d: "hello@meridianmortgage.co", h: "mailto:hello@meridianmortgage.co" },
-                { i: MapPin, t: "Office", d: "Level 12, 88 Harbour St, Sydney NSW 2000" },
-                { i: Clock, t: "Hours", d: "Mon–Fri 8:30am – 6:00pm · Sat by appointment" },
+                { i: Phone, t: "Phone", d: "0410 391 183", h: "tel:0410 391 183" },
+                { i: Mail, t: "Email", d: "info@kmfinancing.com", h: "mailto:info@kmfinancing.com" },
+               
+                { i: Clock, t: "Hours", d: "Mon–Fri 8:30am – 6:00pm" },
               ].map((c) => (
                 <a key={c.t} href={c.h} className="flex items-start gap-4 group">
                   <div className="h-11 w-11 rounded-lg bg-primary text-primary-foreground flex items-center justify-center shrink-0 group-hover:bg-accent group-hover:text-accent-foreground transition-colors">
@@ -42,19 +42,7 @@ const Contact = () => {
               ))}
             </div>
 
-            {/* Map placeholder */}
-            <Card className="mt-8 overflow-hidden border-border/60">
-              <div className="relative h-56 bg-gradient-to-br from-primary/90 to-teal/80">
-                <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "linear-gradient(hsl(var(--primary-foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary-foreground)) 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center text-primary-foreground">
-                    <MapPin className="h-8 w-8 mx-auto text-accent" />
-                    <div className="font-display text-lg mt-2">88 Harbour Street</div>
-                    <div className="text-sm text-primary-foreground/70">Sydney CBD · Map placeholder</div>
-                  </div>
-                </div>
-              </div>
-            </Card>
+
           </div>
 
           <LeadForm title="Send a message" subtitle="A broker will respond within one business day." />
