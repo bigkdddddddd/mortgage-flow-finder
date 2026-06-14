@@ -66,8 +66,8 @@ export const SiteHeader = () => {
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
-          <a href="tel:1300000000" className="hidden xl:flex items-center gap-2 text-sm text-foreground/75 hover:text-foreground transition-colors">
-            <Phone className="h-4 w-4" /> 1300 000 000
+          <a href="tel:0410 391 183" className="hidden xl:flex items-center gap-2 text-sm text-foreground/75 hover:text-foreground transition-colors">
+            <Phone className="h-4 w-4" /> 0410 391 183
           </a>
           <Button asChild variant="gold" size="sm">
             <Link to="/book">Book Appointment</Link>

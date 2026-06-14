@@ -76,7 +76,7 @@ export const LeadForm = ({ variant = "card", defaultTopic, title = "Request a ca
         </div>
         <h3 className="font-display text-xl mt-4">Thank you, {data.name.split(" ")[0]}!</h3>
         <p className="text-sm text-muted-foreground mt-2 max-w-sm mx-auto">
-          Your request is in our inbox. Expect a call from a Meridian broker shortly — usually within one business day.
+          Your request is in our inbox. Expect a call from a KM Financing broker shortly — usually within one business day.
         </p>
       </div>
     );
@@ -120,7 +120,7 @@ export const LeadForm = ({ variant = "card", defaultTopic, title = "Request a ca
             <SelectItem value="refinance">Refinancing my loan</SelectItem>
             <SelectItem value="investment">Investment property</SelectItem>
             <SelectItem value="construction">Construction loan</SelectItem>
-            <SelectItem value="commercial">Commercial finance</SelectItem>
+            <SelectItem value="commercial">Asset finance (Car loans, Other assets)</SelectItem>
             <SelectItem value="self-employed">Self-employed lending</SelectItem>
             <SelectItem value="other">Something else</SelectItem>
           </SelectContent>
