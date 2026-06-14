@@ -3,15 +3,15 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const CAL_URL = "https://connector-gateway.lovable.dev/google_calendar/calendar/v3";
-const RESEND_URL = "https://connector-gateway.lovable.dev/resend";
+const RESEND_URL = "https://api.resend.com/emails";
 const FROM_ADDRESS = "KM Financing <info@kmfinancing.com>";
+const BUSINESS_EMAIL = "komailmousavi1@gmail.com";
 
 interface BookingPayload {
   name: string;
   email: string;
   phone: string;
-  startISO: string; // ISO datetime
+  startISO: string;
   endISO: string;
   mode: string;
   purpose?: string;
@@ -19,97 +19,110 @@ interface BookingPayload {
   notes?: string;
 }
 
-Deno.serve(async (req) => {
+const escapeHtml = (value: string) =>
+  value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+async function sendEmail(apiKey: string, to: string[], subject: string, html: string) {
+  const res = await fetch(RESEND_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({ from: FROM_ADDRESS, to, subject, html }),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    console.error("resend error", data);
+    throw new Error(`Resend ${res.status}: ${JSON.stringify(data)}`);
+  }
+  return data;
+}
+
+Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    const GOOGLE_CALENDAR_API_KEY = Deno.env.get("GOOGLE_CALENDAR_API_KEY");
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-    if (!LOVABLE_API_KEY || !GOOGLE_CALENDAR_API_KEY || !RESEND_API_KEY) {
-      throw new Error("Missing one of LOVABLE_API_KEY, GOOGLE_CALENDAR_API_KEY, RESEND_API_KEY");
-    }
+    if (!RESEND_API_KEY) throw new Error("RESEND_API_KEY missing");
 
     const p = (await req.json()) as BookingPayload;
-    if (!p.name || !p.email || !p.startISO || !p.endISO) {
-      return new Response(JSON.stringify({ error: "name, email, startISO, endISO required" }), {
+    if (!p.name || !p.email || !p.phone || !p.startISO || !p.endISO) {
+      return new Response(JSON.stringify({ error: "name, email, phone, startISO, endISO required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // 1) Create Google Calendar event
-    const eventBody = {
-      summary: `Finance consultation — ${p.name}`,
-      description: [
-        `Mode: ${p.mode}`,
-        `Phone: ${p.phone}`,
-        p.purpose ? `Purpose: ${p.purpose}` : null,
-        p.amount ? `Amount: ${p.amount}` : null,
-        p.notes ? `\nNotes:\n${p.notes}` : null,
-      ].filter(Boolean).join("\n"),
-      start: { dateTime: p.startISO, timeZone: "Australia/Sydney" },
-      end: { dateTime: p.endISO, timeZone: "Australia/Sydney" },
-      attendees: [{ email: p.email, displayName: p.name }],
-    };
-
-    const calRes = await fetch(`${CAL_URL}/calendars/primary/events?sendUpdates=all`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "X-Connection-Api-Key": GOOGLE_CALENDAR_API_KEY,
-      },
-      body: JSON.stringify(eventBody),
-    });
-    const calData = await calRes.json();
-    if (!calRes.ok) {
-      console.error("calendar error", calData);
-      throw new Error(`Calendar ${calRes.status}: ${JSON.stringify(calData)}`);
-    }
-
-    // 2) Send confirmation email via Resend
     const prettyTime = new Date(p.startISO).toLocaleString("en-AU", {
       timeZone: "Australia/Sydney",
-      weekday: "long", day: "numeric", month: "long", hour: "numeric", minute: "2-digit",
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      hour: "numeric",
+      minute: "2-digit",
     });
 
-    const html = `
-      <div style="font-family: -apple-system, Segoe UI, Roboto, sans-serif; max-width:560px; margin:auto; padding:24px; color:#1a1a1a;">
-        <h1 style="font-size:22px; margin:0 0 12px;">You're booked in, ${p.name.split(" ")[0]}! 🎉</h1>
-        <p style="color:#555; line-height:1.5;">Thanks for booking a consultation with <b>KM Financing</b>. Here are the details:</p>
-        <div style="background:#f7f4ee; border:1px solid #e6dfd0; border-radius:12px; padding:16px; margin:16px 0;">
+    const safeName = escapeHtml(p.name);
+    const safeEmail = escapeHtml(p.email);
+    const safePhone = escapeHtml(p.phone);
+    const safeMode = escapeHtml(p.mode || "Not specified");
+    const safePurpose = escapeHtml(p.purpose || "Not specified");
+    const safeAmount = escapeHtml(p.amount || "Not specified");
+    const safeNotes = p.notes ? escapeHtml(p.notes) : "None";
+
+    const businessHtml = `
+      <div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:640px;margin:auto;padding:24px;color:#1a1a1a;">
+        <h1 style="font-size:22px;margin:0 0 16px;">New booking request</h1>
+        <div style="background:#f7f4ee;border:1px solid #e6dfd0;border-radius:12px;padding:16px;margin:16px 0;line-height:1.6;">
+          <div><b>Name:</b> ${safeName}</div>
+          <div><b>Email:</b> ${safeEmail}</div>
+          <div><b>Phone:</b> ${safePhone}</div>
           <div><b>When:</b> ${prettyTime} (AEST)</div>
-          <div><b>Mode:</b> ${p.mode}</div>
-          ${p.purpose ? `<div><b>Topic:</b> ${p.purpose}</div>` : ""}
+          <div><b>Mode:</b> ${safeMode}</div>
+          <div><b>Purpose:</b> ${safePurpose}</div>
+          <div><b>Amount:</b> ${safeAmount}</div>
+          <div><b>Notes:</b><br>${safeNotes}</div>
         </div>
-        <p style="color:#555; line-height:1.5;">We've added it to our calendar and sent you an invite. Have your payslips, ID, and a recent bank statement handy — it'll speed things along.</p>
-        <p style="color:#888; font-size:12px; margin-top:24px;">Need to reschedule? Just reply to this email.</p>
       </div>`;
 
-    const mailRes = await fetch(`${RESEND_URL}/emails`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "X-Connection-Api-Key": RESEND_API_KEY,
-      },
-      body: JSON.stringify({
-        from: FROM_ADDRESS,
-        to: [p.email],
-        subject: `Your consultation is confirmed — ${prettyTime}`,
-        html,
-      }),
-    });
-    const mailData = await mailRes.json();
-    if (!mailRes.ok) console.error("email error", mailData);
+    const customerHtml = `
+      <div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:560px;margin:auto;padding:24px;color:#1a1a1a;">
+        <h1 style="font-size:22px;margin:0 0 12px;">Thanks, ${escapeHtml(p.name.split(" ")[0])}!</h1>
+        <p style="color:#555;line-height:1.5;">We received your booking request with <b>KM Financing</b>.</p>
+        <div style="background:#f7f4ee;border:1px solid #e6dfd0;border-radius:12px;padding:16px;margin:16px 0;line-height:1.6;">
+          <div><b>Requested time:</b> ${prettyTime} (AEST)</div>
+          <div><b>Mode:</b> ${safeMode}</div>
+          <div><b>Topic:</b> ${safePurpose}</div>
+        </div>
+        <p style="color:#555;line-height:1.5;">We will be in touch to confirm the appointment. If anything changes, reply to this email or call us directly.</p>
+        <p style="color:#888;font-size:12px;margin-top:24px;">— The KM Financing team</p>
+      </div>`;
 
-    return new Response(JSON.stringify({
-      success: true,
-      eventId: calData?.id,
-      htmlLink: calData?.htmlLink,
-      emailSent: mailRes.ok,
-    }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const businessEmail = await sendEmail(
+      RESEND_API_KEY,
+      [BUSINESS_EMAIL],
+      `New booking request — ${safeName} — ${prettyTime}`,
+      businessHtml,
+    );
+
+    const customerEmail = await sendEmail(
+      RESEND_API_KEY,
+      [p.email],
+      `Your KM Financing booking request — ${prettyTime}`,
+      customerHtml,
+    );
+
+    return new Response(
+      JSON.stringify({ success: true, businessEmailId: businessEmail?.id, customerEmailId: customerEmail?.id }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
   } catch (err) {
     console.error("create-booking error", err);
     const msg = err instanceof Error ? err.message : "unknown";
