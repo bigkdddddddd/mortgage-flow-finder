@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
 
     // 1) Create Google Calendar event
     const eventBody = {
-      summary: `Mortgage consultation — ${p.name}`,
+      summary: `Finance consultation — ${p.name}`,
       description: [
         `Mode: ${p.mode}`,
         `Phone: ${p.phone}`,
@@ -77,7 +77,7 @@ Deno.serve(async (req) => {
     const html = `
       <div style="font-family: -apple-system, Segoe UI, Roboto, sans-serif; max-width:560px; margin:auto; padding:24px; color:#1a1a1a;">
         <h1 style="font-size:22px; margin:0 0 12px;">You're booked in, ${p.name.split(" ")[0]}! 🎉</h1>
-        <p style="color:#555; line-height:1.5;">Thanks for booking a consultation with <b>Meridian Mortgage</b>. Here are the details:</p>
+        <p style="color:#555; line-height:1.5;">Thanks for booking a consultation with <b>KM Financing</b>. Here are the details:</p>
         <div style="background:#f7f4ee; border:1px solid #e6dfd0; border-radius:12px; padding:16px; margin:16px 0;">
           <div><b>When:</b> ${prettyTime} (AEST)</div>
           <div><b>Mode:</b> ${p.mode}</div>
